@@ -5,6 +5,8 @@ import {
   IonPage,
 } from '@ionic/react';
 
+import { Link } from 'react-router-dom';
+
 import {
   gridOutline,
   cubeOutline,
@@ -39,15 +41,19 @@ const Home: React.FC = () => {
             <p className="menu-label">MENÚ PRINCIPAL</p>
 
             <nav className="navigation" aria-label="Menú principal">
-              <a href="/home" className="nav-link active" aria-current="page">
+              <Link
+                to="/home"
+                className="nav-link active"
+                aria-current="page"
+              >
                 <IonIcon icon={gridOutline} />
                 <span>Panel principal</span>
-              </a>
+              </Link>
 
-              <a href="#" className="nav-link">
+              <Link to="/products" className="nav-link">
                 <IonIcon icon={cubeOutline} />
                 <span>Productos</span>
-              </a>
+              </Link>
 
               <a href="#" className="nav-link">
                 <IonIcon icon={peopleOutline} />
