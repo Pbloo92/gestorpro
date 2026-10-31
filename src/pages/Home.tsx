@@ -22,9 +22,9 @@ import {
 } from 'ionicons/icons';
 
 import './Home.css';
-import StatCard from '../components/StatCard';
 import ActivityItem from '../components/ActivityItem';
 import { useAuth } from '../auth/AuthContext';
+import DashboardStats from '../components/DashboardStats/DashboardStats';
 
 const Home: React.FC = () => {
   const { user, logout } = useAuth();
@@ -155,44 +155,8 @@ const Home: React.FC = () => {
               </div>
             </section>
 
-            {/* Tarjetas de resumen */}
-            <section className="stats-grid" aria-label="Resumen del inventario">
-              <StatCard
-                title="Total de productos"
-                value="248"
-                icon={<IonIcon icon={cubeOutline} />}
-                tone="blue"
-                note="12% respecto al mes anterior"
-                noteType="positive"
-              />
-
-              <StatCard
-                title="Usuarios registrados"
-                value="36"
-                icon={<IonIcon icon={peopleOutline} />}
-                tone="purple"
-                note="4 nuevos este mes"
-                noteType="positive"
-              />
-
-              <StatCard
-                title="Stock bajo"
-                value="8"
-                icon={<IonIcon icon={alertCircleOutline} />}
-                tone="orange"
-                note="Productos que necesitan revisión"
-                noteType="warning"
-              />
-
-              <StatCard
-                title="Valor del inventario"
-                value="18.450 €"
-                icon={<IonIcon icon={statsChartOutline} />}
-                tone="green"
-                note="6% respecto al mes anterior"
-                noteType="positive"
-              />
-            </section>
+            {/* Estadísticas dinámicas del inventario */}
+            <DashboardStats />
 
             {/* Actividad reciente y alertas */}
             <section className="content-grid">
@@ -271,6 +235,7 @@ const Home: React.FC = () => {
 
             </section>
 
+            {/* Pie de página */}
             <footer className="dashboard-footer">
               GestorPro · Gestión sencilla de inventario
             </footer>
