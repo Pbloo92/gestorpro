@@ -1,3 +1,4 @@
+
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Navigate, Route } from 'react-router-dom';
@@ -5,6 +6,7 @@ import { Navigate, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Products from './pages/Products/Products';
 import Login from './pages/Login/Login';
+import Users from './pages/Users/Users';
 
 import { AuthProvider, useAuth } from './auth/AuthContext';
 
@@ -35,6 +37,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
     : <Navigate to="/login" replace />;
 };
 
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({
+  children
+}) => {
+  const { user } = useAuth();
+
+  return user?.role === 'admin'
+    ? <>{children}</>
+    : <Navigate to="/home" replace />;
+};
+
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
@@ -63,6 +75,17 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Products />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute>
+            <AdminRoute>
+              <Users />
+            </AdminRoute>
           </ProtectedRoute>
         }
       />
