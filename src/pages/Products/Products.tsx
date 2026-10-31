@@ -33,6 +33,11 @@ import {
   deleteProduct
 } from './productsService';
 
+import {
+  exportProductsCSV,
+  exportProductsPDF
+} from '../../utils/exportUtils';
+
 import './Products.css';
 
 const Products: React.FC = () => {
@@ -188,10 +193,30 @@ const Products: React.FC = () => {
             <p>Administra el inventario de tu negocio.</p>
           </div>
 
-          <IonButton onClick={openNewProductForm}>
-            <IonIcon slot="start" icon={addOutline} />
-            Añadir producto
-          </IonButton>
+          <div className="products-header-actions">
+            <IonButton onClick={openNewProductForm}>
+              <IonIcon slot="start" icon={addOutline} />
+              Añadir producto
+            </IonButton>
+
+            <IonButton
+              fill="outline"
+              color="success"
+              onClick={() => exportProductsCSV(products)}
+              disabled={products.length === 0}
+            >
+              Exportar CSV
+            </IonButton>
+
+            <IonButton
+              fill="outline"
+              color="tertiary"
+              onClick={() => exportProductsPDF(products)}
+              disabled={products.length === 0}
+            >
+              Exportar PDF
+            </IonButton>
+          </div>
         </div>
 
         {serviceError && (
