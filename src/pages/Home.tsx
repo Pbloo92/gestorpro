@@ -1,11 +1,10 @@
-
 import {
   IonContent,
   IonIcon,
   IonPage,
 } from '@ionic/react';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import {
   gridOutline,
@@ -19,13 +18,30 @@ import {
   alertCircleOutline,
   checkmarkCircleOutline,
   timeOutline,
+  logOutOutline,
 } from 'ionicons/icons';
 
 import './Home.css';
 import StatCard from '../components/StatCard';
 import ActivityItem from '../components/ActivityItem';
+import { useAuth } from '../auth/AuthContext';
 
 const Home: React.FC = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
+  const initials = user?.name
+    .split(' ')
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <IonPage>
       <IonContent className="dashboard-content">
@@ -55,15 +71,19 @@ const Home: React.FC = () => {
                 <span>Productos</span>
               </Link>
 
-              <a href="#" className="nav-link">
-                <IonIcon icon={peopleOutline} />
-                <span>Usuarios</span>
-              </a>
+              {user?.role === 'admin' && (
+                <>
+                  <a href="#" className="nav-link">
+                    <IonIcon icon={peopleOutline} />
+                    <span>Usuarios</span>
+                  </a>
 
-              <a href="#" className="nav-link">
-                <IonIcon icon={statsChartOutline} />
-                <span>Informes</span>
-              </a>
+                  <a href="#" className="nav-link">
+                    <IonIcon icon={statsChartOutline} />
+                    <span>Informes</span>
+                  </a>
+                </>
+              )}
             </nav>
 
             <div className="sidebar-bottom">
@@ -73,12 +93,33 @@ const Home: React.FC = () => {
               </a>
 
               <div className="user-profile">
-                <div className="avatar">AD</div>
+                <div className="avatar">{initials}</div>
                 <div>
-                  <strong>Administrador</strong>
-                  <small>admin@gestorpro.com</small>
+                  <strong>{user?.name}</strong>
+                  <small>{user?.email}</small>
+                  <small>
+                    {user?.role === 'admin'
+                      ? 'Administrador'
+                      : 'Usuario estándar'}
+                  </small>
                 </div>
               </div>
+
+              <button
+                className="nav-link"
+                onClick={handleLogout}
+                aria-label="Cerrar sesión"
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <IonIcon icon={logOutOutline} />
+                <span>Cerrar sesión</span>
+              </button>
             </div>
           </aside>
 
@@ -99,17 +140,17 @@ const Home: React.FC = () => {
                   <IonIcon icon={notificationsOutline} />
                 </button>
 
-                <button className="add-button">
+                <Link to="/products" className="add-button">
                   <IonIcon icon={addOutline} />
                   Nuevo producto
-                </button>
+                </Link>
               </div>
             </header>
 
             {/* Bienvenida */}
             <section className="welcome-section">
               <div>
-                <h2>¡Bienvenido a GestorPro!</h2>
+                <h2>¡Bienvenido, {user?.name}!</h2>
                 <p>Aquí tienes un resumen del estado de tu negocio.</p>
               </div>
             </section>
@@ -156,7 +197,6 @@ const Home: React.FC = () => {
             {/* Actividad reciente y alertas */}
             <section className="content-grid">
 
-              {/* Panel de actividad */}
               <article className="panel">
                 <div className="panel-heading">
                   <div>
@@ -191,7 +231,6 @@ const Home: React.FC = () => {
                 />
               </article>
 
-              {/* Panel de alertas */}
               <article className="panel alerts-panel">
                 <div className="panel-heading">
                   <div>
@@ -232,7 +271,6 @@ const Home: React.FC = () => {
 
             </section>
 
-            {/* Pie de página */}
             <footer className="dashboard-footer">
               GestorPro · Gestión sencilla de inventario
             </footer>
