@@ -1,3 +1,4 @@
+
 import {
   IonContent,
   IonIcon,
@@ -13,13 +14,14 @@ import {
   notificationsOutline,
   searchOutline,
   addOutline,
-  arrowUpOutline,
   alertCircleOutline,
   checkmarkCircleOutline,
   timeOutline,
 } from 'ionicons/icons';
 
 import './Home.css';
+import StatCard from '../components/StatCard';
+import ActivityItem from '../components/ActivityItem';
 
 const Home: React.FC = () => {
   return (
@@ -68,7 +70,7 @@ const Home: React.FC = () => {
                 <div className="avatar">AD</div>
                 <div>
                   <strong>Administrador</strong>
-                  <small> admin@gestorpro.com</small>
+                  <small>admin@gestorpro.com</small>
                 </div>
               </div>
             </div>
@@ -98,6 +100,7 @@ const Home: React.FC = () => {
               </div>
             </header>
 
+            {/* Bienvenida */}
             <section className="welcome-section">
               <div>
                 <h2>¡Bienvenido a GestorPro!</h2>
@@ -107,62 +110,47 @@ const Home: React.FC = () => {
 
             {/* Tarjetas de resumen */}
             <section className="stats-grid" aria-label="Resumen del inventario">
-              <article className="stat-card">
-                <div className="stat-heading">
-                  <span>Total de productos</span>
-                  <div className="stat-icon blue">
-                    <IonIcon icon={cubeOutline} />
-                  </div>
-                </div>
-                <strong className="stat-number">248</strong>
-                <p className="stat-note positive">
-                  <IonIcon icon={arrowUpOutline} />
-                  12% respecto al mes anterior
-                </p>
-              </article>
+              <StatCard
+                title="Total de productos"
+                value="248"
+                icon={<IonIcon icon={cubeOutline} />}
+                tone="blue"
+                note="12% respecto al mes anterior"
+                noteType="positive"
+              />
 
-              <article className="stat-card">
-                <div className="stat-heading">
-                  <span>Usuarios registrados</span>
-                  <div className="stat-icon purple">
-                    <IonIcon icon={peopleOutline} />
-                  </div>
-                </div>
-                <strong className="stat-number">36</strong>
-                <p className="stat-note positive">
-                  <IonIcon icon={arrowUpOutline} />
-                  4 nuevos este mes
-                </p>
-              </article>
+              <StatCard
+                title="Usuarios registrados"
+                value="36"
+                icon={<IonIcon icon={peopleOutline} />}
+                tone="purple"
+                note="4 nuevos este mes"
+                noteType="positive"
+              />
 
-              <article className="stat-card">
-                <div className="stat-heading">
-                  <span>Stock bajo</span>
-                  <div className="stat-icon orange">
-                    <IonIcon icon={alertCircleOutline} />
-                  </div>
-                </div>
-                <strong className="stat-number">8</strong>
-                <p className="stat-note warning">Productos que necesitan revisión</p>
-              </article>
+              <StatCard
+                title="Stock bajo"
+                value="8"
+                icon={<IonIcon icon={alertCircleOutline} />}
+                tone="orange"
+                note="Productos que necesitan revisión"
+                noteType="warning"
+              />
 
-              <article className="stat-card">
-                <div className="stat-heading">
-                  <span>Valor del inventario</span>
-                  <div className="stat-icon green">
-                    <IonIcon icon={statsChartOutline} />
-                  </div>
-                </div>
-                <strong className="stat-number">18.450 €</strong>
-                <p className="stat-note positive">
-                  <IonIcon icon={arrowUpOutline} />
-                  6% respecto al mes anterior
-                </p>
-              </article>
+              <StatCard
+                title="Valor del inventario"
+                value="18.450 €"
+                icon={<IonIcon icon={statsChartOutline} />}
+                tone="green"
+                note="6% respecto al mes anterior"
+                noteType="positive"
+              />
             </section>
 
             {/* Actividad reciente y alertas */}
             <section className="content-grid">
+
+              {/* Panel de actividad */}
               <article className="panel">
                 <div className="panel-heading">
                   <div>
@@ -172,40 +160,32 @@ const Home: React.FC = () => {
                   <button className="text-button">Ver todo</button>
                 </div>
 
-                <div className="activity-item">
-                  <div className="activity-icon success">
-                    <IonIcon icon={checkmarkCircleOutline} />
-                  </div>
-                  <div className="activity-description">
-                    <strong>Producto añadido</strong>
-                    <span>Teclado inalámbrico</span>
-                  </div>
-                  <time>Hace 10 min</time>
-                </div>
+                <ActivityItem
+                  title="Producto añadido"
+                  description="Teclado inalámbrico"
+                  time="Hace 10 min"
+                  icon={checkmarkCircleOutline}
+                  type="success"
+                />
 
-                <div className="activity-item">
-                  <div className="activity-icon warning">
-                    <IonIcon icon={alertCircleOutline} />
-                  </div>
-                  <div className="activity-description">
-                    <strong>Stock actualizado</strong>
-                    <span>Ratón óptico - quedan 3 unidades</span>
-                  </div>
-                  <time>Hace 1 hora</time>
-                </div>
+                <ActivityItem
+                  title="Stock actualizado"
+                  description="Ratón óptico - quedan 3 unidades"
+                  time="Hace 1 hora"
+                  icon={alertCircleOutline}
+                  type="warning"
+                />
 
-                <div className="activity-item">
-                  <div className="activity-icon success">
-                    <IonIcon icon={checkmarkCircleOutline} />
-                  </div>
-                  <div className="activity-description">
-                    <strong>Usuario registrado</strong>
-                    <span>Nuevo usuario: Laura García</span>
-                  </div>
-                  <time>Hace 3 horas</time>
-                </div>
+                <ActivityItem
+                  title="Usuario registrado"
+                  description="Nuevo usuario: Laura García"
+                  time="Hace 3 horas"
+                  icon={checkmarkCircleOutline}
+                  type="success"
+                />
               </article>
 
+              {/* Panel de alertas */}
               <article className="panel alerts-panel">
                 <div className="panel-heading">
                   <div>
@@ -243,8 +223,10 @@ const Home: React.FC = () => {
                   Datos de ejemplo para la demostración
                 </div>
               </article>
+
             </section>
 
+            {/* Pie de página */}
             <footer className="dashboard-footer">
               GestorPro · Gestión sencilla de inventario
             </footer>
