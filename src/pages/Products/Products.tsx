@@ -1,4 +1,6 @@
 
+import { useState } from 'react';
+
 import {
   IonContent,
   IonPage,
@@ -6,18 +8,121 @@ import {
   IonToolbar,
   IonTitle,
   IonButton,
-  IonIcon
+  IonIcon,
+  IonInput,
+  IonSelect,
+  IonSelectOption,
+  IonItem,
+  IonLabel,
+  IonText
 } from '@ionic/react';
 
-import { addOutline, cubeOutline } from 'ionicons/icons';
+import {
+  addOutline,
+  closeOutline,
+  createOutline,
+  trashOutline
+} from 'ionicons/icons';
 
-import { useState } from 'react';
-import { initialProducts, Product } from './productsData';
+import { initialProducts } from './productsData';
+import type { Product } from './productsData';
 
 import './Products.css';
 
 const Products: React.FC = () => {
-  const [products] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [price, setPrice] = useState('');
+  const [stock, setStock] = useState('');
+
+  const [error, setError] = useState('');
+
+  // Limpiar los campos del formulario
+  const resetForm = () => {
+    setName('');
+    setCategory('');
+    setPrice('');
+    setStock('');
+    setError('');
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  // Abrir el formulario para añadir un producto
+  const openNewProductForm = () => {
+    resetForm();
+    setShowForm(true);
+  };
+
+  // Guardar un producto nuevo o sus modificaciones
+  const handleSaveProduct = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!name.trim() || !category || !price.trim() || !stock.trim()) {
+      setError('Todos los campos son obligatorios.');
+      return;
+    }
+
+    const productPrice = Number(price);
+    const productStock = Number(stock);
+
+    if (!Number.isFinite(productPrice) || productPrice <= 0) {
+      setError('El precio debe ser mayor que cero.');
+      return;
+    }
+
+    if (!Number.isInteger(productStock) || productStock < 0) {
+      setError('El stock debe ser un número entero igual o superior a cero.');
+      return;
+    }
+
+    const productData: Product = {
+      id: editingId ?? Date.now(),
+      name: name.trim(),
+      category,
+      price: productPrice,
+      stock: productStock
+    };
+
+    if (editingId !== null) {
+      setProducts(
+        products.map((product) =>
+          product.id === editingId ? productData : product
+        )
+      );
+    } else {
+      setProducts([...products, productData]);
+    }
+
+    resetForm();
+  };
+
+  // Cargar los datos de un producto para editarlo
+  const handleEditProduct = (product: Product) => {
+    setEditingId(product.id);
+    setName(product.name);
+    setCategory(product.category);
+    setPrice(String(product.price));
+    setStock(String(product.stock));
+    setError('');
+    setShowForm(true);
+  };
+
+  // Eliminar un producto
+  const handleDeleteProduct = (id: number) => {
+    const confirmed = window.confirm(
+      '¿Estás seguro de que quieres eliminar este producto?'
+    );
+
+    if (confirmed) {
+      setProducts(products.filter((product) => product.id !== id));
+    }
+  };
 
   return (
     <IonPage>
@@ -28,18 +133,113 @@ const Products: React.FC = () => {
       </IonHeader>
 
       <IonContent className="ion-padding">
+
         <div className="products-header">
           <div>
             <h1>Productos</h1>
             <p>Administra el inventario de tu negocio.</p>
           </div>
 
-          <IonButton>
+          <IonButton onClick={openNewProductForm}>
             <IonIcon slot="start" icon={addOutline} />
             Añadir producto
           </IonButton>
         </div>
 
+        {/* Formulario de productos */}
+        {showForm && (
+          <div className="product-form-container">
+            <h2>
+              {editingId !== null ? 'Editar producto' : 'Nuevo producto'}
+            </h2>
+
+            <form onSubmit={handleSaveProduct}>
+              <IonItem>
+                <IonLabel position="stacked">Nombre del producto</IonLabel>
+                <IonInput
+                  value={name}
+                  placeholder="Ej. Teclado inalámbrico"
+                  onIonInput={(event) =>
+                    setName(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonLabel position="stacked">Categoría</IonLabel>
+                <IonSelect
+                  value={category}
+                  placeholder="Selecciona una categoría"
+                  onIonChange={(event) => setCategory(event.detail.value)}
+                >
+                  <IonSelectOption value="Periféricos">
+                    Periféricos
+                  </IonSelectOption>
+                  <IonSelectOption value="Monitores">
+                    Monitores
+                  </IonSelectOption>
+                  <IonSelectOption value="Ordenadores">
+                    Ordenadores
+                  </IonSelectOption>
+                  <IonSelectOption value="Accesorios">
+                    Accesorios
+                  </IonSelectOption>
+                </IonSelect>
+              </IonItem>
+
+              <IonItem>
+                <IonLabel position="stacked">Precio (€)</IonLabel>
+                <IonInput
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={price}
+                  placeholder="Ej. 49.99"
+                  onIonInput={(event) =>
+                    setPrice(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              <IonItem>
+                <IonLabel position="stacked">Unidades en stock</IonLabel>
+                <IonInput
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={stock}
+                  placeholder="Ej. 10"
+                  onIonInput={(event) =>
+                    setStock(String(event.detail.value ?? ''))
+                  }
+                />
+              </IonItem>
+
+              {error && (
+                <IonText color="danger">
+                  <p className="form-error">{error}</p>
+                </IonText>
+              )}
+
+              <div className="form-actions">
+                <IonButton type="submit">
+                  {editingId !== null ? 'Guardar cambios' : 'Guardar producto'}
+                </IonButton>
+
+                <IonButton
+                  type="button"
+                  fill="outline"
+                  color="medium"
+                  onClick={resetForm}
+                >
+                  Cancelar
+                </IonButton>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Resumen */}
         <div className="products-summary">
           <div className="summary-box">
             <span>Total de productos</span>
@@ -49,11 +249,15 @@ const Products: React.FC = () => {
           <div className="summary-box">
             <span>Stock disponible</span>
             <strong>
-              {products.reduce((total, product) => total + product.stock, 0)}
+              {products.reduce(
+                (total, product) => total + product.stock,
+                0
+              )}
             </strong>
           </div>
         </div>
 
+        {/* Tabla */}
         <div className="products-table-container">
           <table className="products-table">
             <thead>
@@ -63,6 +267,7 @@ const Products: React.FC = () => {
                 <th>Precio</th>
                 <th>Stock</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
 
@@ -90,8 +295,38 @@ const Products: React.FC = () => {
                         : 'Disponible'}
                     </span>
                   </td>
+                  <td>
+                    <div className="product-actions">
+                      <IonButton
+                        fill="clear"
+                        size="small"
+                        aria-label={`Editar ${product.name}`}
+                        onClick={() => handleEditProduct(product)}
+                      >
+                        <IonIcon icon={createOutline} />
+                      </IonButton>
+
+                      <IonButton
+                        fill="clear"
+                        color="danger"
+                        size="small"
+                        aria-label={`Eliminar ${product.name}`}
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        <IonIcon icon={trashOutline} />
+                      </IonButton>
+                    </div>
+                  </td>
                 </tr>
               ))}
+
+              {products.length === 0 && (
+                <tr>
+                  <td colSpan={6}>
+                    No hay productos registrados.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
