@@ -6,6 +6,8 @@ GestorPro es una aplicación web de gestión de productos e inventario desarroll
 
 Su objetivo es facilitar la administración de productos mediante una interfaz intuitiva, adaptable a distintos dispositivos y con control de acceso según el tipo de usuario.
 
+La aplicación permite consultar, crear, modificar y eliminar productos, así como visualizar estadísticas del inventario y exportar información.
+
 ## 2. Tecnologías utilizadas
 
 - **Ionic:** componentes e interfaz de aplicación.
@@ -14,7 +16,9 @@ Su objetivo es facilitar la administración de productos mediante una interfaz i
 - **React Router:** navegación entre páginas y protección de rutas.
 - **Chart.js:** representación gráfica de estadísticas.
 - **jsPDF:** generación de documentos PDF.
-- **LocalStorage:** almacenamiento local de los productos.
+- **Supabase:** servicio backend para la gestión de productos.
+- **PostgreSQL:** base de datos relacional utilizada por Supabase.
+- **@supabase/supabase-js:** biblioteca para conectar la aplicación con Supabase.
 - **Vercel:** despliegue de la aplicación.
 - **Git y GitHub:** control de versiones y alojamiento del repositorio.
 
@@ -59,7 +63,7 @@ Este contexto permite mantener el estado del usuario autenticado y controlar el 
 
 Los usuarios de prueba son ficticios y se utilizan exclusivamente para demostrar el funcionamiento de los roles.
 
-**Nota:** esta implementación es de demostración. No debe considerarse un sistema de autenticación seguro para producción, ya que utiliza almacenamiento local y credenciales de prueba.
+**Nota de seguridad:** la autenticación implementada es una solución de demostración. No utiliza actualmente Supabase Auth y no debe considerarse un sistema de autenticación seguro para producción. Las credenciales de prueba y la sesión se gestionan en el lado del cliente.
 
 ## 6. Gestión de productos
 
@@ -71,9 +75,18 @@ La funcionalidad de productos permite:
 - Eliminar productos.
 - Validar los datos introducidos.
 
-La lógica de acceso a los datos se encuentra separada en `productsService.ts`.
+La lógica de acceso a los datos se encuentra separada en `src/pages/Products/productsService.ts`.
 
-El servicio utiliza operaciones asíncronas y `localStorage` para simular la persistencia de datos.
+Este servicio utiliza Supabase para realizar operaciones asíncronas sobre la tabla `products` de PostgreSQL.
+
+Se implementan las siguientes operaciones:
+
+- `getProducts()`: obtiene los productos registrados.
+- `addProduct()`: añade un producto nuevo.
+- `updateProduct()`: modifica un producto existente.
+- `deleteProduct()`: elimina un producto.
+
+Las operaciones gestionan los posibles errores devueltos por el servicio.
 
 ## 7. Panel de estadísticas
 
@@ -88,22 +101,47 @@ Se calculan los siguientes indicadores:
 
 Se incluyen gráficos de barras y de tipo doughnut.
 
+Los datos utilizados para calcular las estadísticas se obtienen mediante el servicio de productos conectado a Supabase.
+
 ## 8. Exportación de información
 
 La aplicación permite exportar los productos en dos formatos:
 
-- CSV, para trabajar con los datos en hojas de cálculo.
-- PDF, mediante la biblioteca jsPDF.
+- **CSV:** para trabajar con los datos en hojas de cálculo.
+- **PDF:** mediante la biblioteca jsPDF.
 
 Las funciones de exportación se encuentran en `src/utils/exportUtils.ts`.
 
-## 9. Almacenamiento y servicios
+## 9. Almacenamiento y conexión con Supabase
 
-Los datos de productos se gestionan mediante un servicio asíncrono que utiliza almacenamiento local del navegador.
+GestorPro utiliza Supabase como servicio backend para almacenar y gestionar los productos.
 
-Esta solución permite probar las operaciones de gestión sin necesidad de configurar un servidor externo.
+La base de datos utiliza PostgreSQL y contiene una tabla denominada `products` con los siguientes campos:
 
-**Limitación técnica:** esta versión no integra una API REST conectada a SQL ni una base de datos NoSQL en tiempo real. El almacenamiento local es una simulación para la demostración del funcionamiento de la aplicación.
+- `id`: identificador del producto.
+- `name`: nombre del producto.
+- `category`: categoría.
+- `price`: precio.
+- `stock`: unidades disponibles.
+- `created_at`: fecha de creación.
+
+La conexión se centraliza en el archivo `src/lib/supabase.ts`, utilizando la biblioteca `@supabase/supabase-js`.
+
+La configuración se realiza mediante variables de entorno:
+
+- `VITE_SUPABASE_URL`: dirección del proyecto Supabase.
+- `VITE_SUPABASE_ANON_KEY`: clave pública de acceso.
+
+El archivo `.env` contiene estas variables y debe permanecer excluido del repositorio.
+
+La tabla utiliza Row Level Security (RLS) y políticas para permitir las operaciones de consulta, inserción, modificación y eliminación configuradas para la demostración.
+
+**Limitaciones técnicas actuales:**
+
+- La base de datos implementada es relacional (PostgreSQL).
+- No se ha integrado un servicio NoSQL independiente.
+- No se ha implementado todavía la recepción de cambios en tiempo real mediante Supabase Realtime.
+- Las políticas de acceso actuales son permisivas y deben restringirse antes de utilizar la aplicación en un entorno real.
 
 ## 10. Control de versiones
 
@@ -129,11 +167,26 @@ https://github.com/Pbloo92/gestorpro
 
 La aplicación se despliega mediante Vercel, conectado al repositorio de GitHub.
 
-- Comando de construcción: `npm run build`
-- Directorio de salida: `dist`
-- Comando de instalación: `npm install`
+Configuración del despliegue:
+
+- **Comando de instalación:** `npm install`
+- **Comando de construcción:** `npm run build`
+- **Directorio de salida:** `dist`
+- **Rama de producción:** `develop`
+
+Las variables de entorno de Supabase deben configurarse también en el panel de Vercel para que la aplicación pueda conectarse a la base de datos en producción.
 
 URL de producción:
 
 https://gestorpro-jet.vercel.app
 
+## 12. Mejoras futuras
+
+Entre las posibles mejoras futuras del proyecto se encuentran:
+
+- Integrar Supabase Auth para gestionar la autenticación de forma segura.
+- Implementar políticas RLS basadas en usuarios y roles.
+- Incorporar Supabase Realtime para recibir actualizaciones de productos en tiempo real.
+- Integrar un servicio NoSQL para completar la arquitectura de datos solicitada.
+- Generar documentación automática del código mediante TypeDoc.
+- Ampliar las pruebas de funcionamiento y accesibilidad.
