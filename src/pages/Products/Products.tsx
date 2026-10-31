@@ -30,7 +30,8 @@ import {
   getProducts,
   addProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  subscribeToProducts
 } from './productsService';
 
 import {
@@ -55,21 +56,46 @@ const Products: React.FC = () => {
 
   const [error, setError] = useState('');
 
-  // Cargar los productos al entrar en la página.
+  // Cargar productos y escuchar cambios en tiempo real.
   useEffect(() => {
-    const loadProducts = async () => {
+    let active = true;
+
+    const loadProducts = async (showSpinner = false) => {
       try {
-        setLoading(true);
+        if (showSpinner && active) {
+          setLoading(true);
+        }
+
         const data = await getProducts();
-        setProducts(data);
+
+        if (active) {
+          setProducts(data);
+          setServiceError('');
+        }
       } catch {
-        setServiceError('No se han podido cargar los productos.');
+        if (active) {
+          setServiceError('No se han podido cargar los productos.');
+        }
       } finally {
-        setLoading(false);
+        if (showSpinner && active) {
+          setLoading(false);
+        }
       }
     };
 
-    loadProducts();
+    // Carga inicial.
+    void loadProducts(true);
+
+    // Escuchar inserciones, modificaciones y eliminaciones.
+    const unsubscribe = subscribeToProducts(() => {
+      void loadProducts();
+    });
+
+    // Cancelar la suscripción al salir de la página.
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   // Limpiar los campos del formulario.

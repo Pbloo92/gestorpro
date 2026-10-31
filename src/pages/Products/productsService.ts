@@ -81,3 +81,29 @@ export const deleteProduct = async (
   return productId;
 };
 
+// Escuchar cambios en tiempo real de la tabla products.
+export const subscribeToProducts = (onChange: () => void) => {
+  const channel = supabase
+    .channel('products-realtime')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'products',
+      },
+      () => {
+        onChange();
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('Error al conectar con Supabase Realtime.');
+      }
+    });
+
+  // Cancelar la suscripción cuando deje de utilizarse.
+  return () => {
+    void supabase.removeChannel(channel);
+  };
+};
