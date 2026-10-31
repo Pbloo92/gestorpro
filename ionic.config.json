@@ -1,0 +1,7 @@
+{
+  "name": "gestorpro",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
