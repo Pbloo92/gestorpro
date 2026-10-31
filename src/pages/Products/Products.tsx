@@ -11,9 +11,14 @@ import {
 
 import { addOutline, cubeOutline } from 'ionicons/icons';
 
+import { useState } from 'react';
+import { initialProducts, Product } from './productsData';
+
 import './Products.css';
 
 const Products: React.FC = () => {
+  const [products] = useState<Product[]>(initialProducts);
+
   return (
     <IonPage>
       <IonHeader>
@@ -35,11 +40,62 @@ const Products: React.FC = () => {
           </IonButton>
         </div>
 
-        <div className="products-empty">
-          <IonIcon icon={cubeOutline} />
-          <h2>Tu inventario está preparado</h2>
-          <p>Próximamente podrás consultar y gestionar tus productos.</p>
+        <div className="products-summary">
+          <div className="summary-box">
+            <span>Total de productos</span>
+            <strong>{products.length}</strong>
+          </div>
+
+          <div className="summary-box">
+            <span>Stock disponible</span>
+            <strong>
+              {products.reduce((total, product) => total + product.stock, 0)}
+            </strong>
+          </div>
         </div>
+
+        <div className="products-table-container">
+          <table className="products-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {products.map((product) => (
+                <tr key={product.id}>
+                  <td>{product.name}</td>
+                  <td>{product.category}</td>
+                  <td>{product.price.toFixed(2)} €</td>
+                  <td>{product.stock}</td>
+                  <td>
+                    <span
+                      className={
+                        product.stock === 0
+                          ? 'product-status unavailable'
+                          : product.stock <= 5
+                          ? 'product-status low'
+                          : 'product-status available'
+                      }
+                    >
+                      {product.stock === 0
+                        ? 'Sin stock'
+                        : product.stock <= 5
+                        ? 'Stock bajo'
+                        : 'Disponible'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
       </IonContent>
     </IonPage>
   );
